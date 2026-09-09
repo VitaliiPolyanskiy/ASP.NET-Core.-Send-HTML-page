@@ -1,51 +1,112 @@
 ﻿<!DOCTYPE html>
-
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="uk">
 <head>
     <meta charset="utf-8" />
-    <title>AJAX(Asynchronous JavaScript And XML)</title>
-    <script src="jquery-3.7.0.js">
-    </script>
+    <title>AJAX (Asynchronous JavaScript And XML)</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        caption {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        select, p {
+            font-size: 1rem;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-    <table id="cities" border="1">
-        <caption>
-            Города Швейцарии
-        </caption>
-        <tr>
-            <td>Название</td>
-            <td>Численность населения</td>
-        </tr>
-        <tr></tr>
+    <table id="cities">
+        <caption>Міста Швейцарії</caption>
+        <thead>
+            <tr>
+                <th>Назва</th>
+                <th>Кількість населення</th>
+            </tr>
+        </thead>
+        <tbody id="cities-body">
+        </tbody>
     </table>
-            <select id="countries">
-                <option>Выберите страну</option>
-            </select>
-            <p id="city"></p>
-            <script>
-                async function doAjax(url) {
-                    let result = await $.getJSON(url);
-                    return result;
-                }
-                $(function () {
-                    doAjax(
-                        "cities.json"
-                    ).then((data) => {
-                        for (let i = 0; i < data.cities.length; i++) {
-                            $('#cities').append('<tr><td>' + data.cities[i].name +
-                                '</td><td>' + data.cities[i].population + '</td><tr>');
-                        }
-                    });
 
-                    $.getJSON('countries.json', function (data) {
-                            $.each(data, function(key, val) {
-                                $('#countries').append('<option value="' + val + '">' + key + '</option>');
-                            });
-                            $('#countries').on('change', function (e) {
-                               $("#city").text($("#countries option:selected").val());
-                            });
-            });
-});
+    <select id="countries">
+        <option value="">Оберіть країну</option>
+    </select>
+    <p><strong>Столиця:</strong> <span id="city"></span></p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCities();
+            await loadCountries();
+        });
+
+        async function loadCities() {
+            try {
+                const response = await fetch('cities.json');
+                if (!response.ok) throw new Error('Помилка завантаження міст');
+                const data = await response.json();
+
+                const tbody = document.getElementById('cities-body');
+                // Використовуємо map та join для швидкого рендерингу без циклу for
+                tbody.innerHTML = data.cities.map(city =>
+                    `<tr><td>${city.name}</td><td>${city.population}</td></tr>`
+                ).join('');
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadCountries() {
+            try {
+                const response = await fetch('countries.json');
+                if (!response.ok) throw new Error('Помилка завантаження країн');
+                const data = await response.json();
+
+                const select = document.getElementById('countries');
+
+                // Використовуємо Object.entries для ітерації по словнику
+                for (const [country, capital] of Object.entries(data)) {
+                    const option = document.createElement('option');
+                    option.value = capital;
+                    option.textContent = country;
+                    select.appendChild(option);
+                }
+
+                select.addEventListener('change', (e) => {
+                    document.getElementById('city').textContent = e.target.value;
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
     </script>
 </body>
 </html>

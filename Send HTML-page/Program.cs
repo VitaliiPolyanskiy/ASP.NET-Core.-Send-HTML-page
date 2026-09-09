@@ -1,11 +1,7 @@
 ﻿var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-app.UseStaticFiles(); // обрабатывает запросы к файлам в папке wwwroot
-app.Run(async (context) =>
-{
-    context.Response.ContentType = "text/html; charset=utf-8";
-    await context.Response.SendFileAsync("wwwroot/index.html");
-});
+app.UseDefaultFiles(); // Автоматично шукає index.html при запиті до кореня (має йти перед UseStaticFiles)
+app.UseStaticFiles();  // Обробляє запити до файлів у папці wwwroot
 
 app.Run();
